@@ -1,0 +1,7 @@
+{
+    "Name" : "demo app",
+    "Version" : "[Zinx V0.4]",
+    "Host" : "192.168.18.128",
+    "TcpPort" : 8999,
+    "MaxConn" : 3
+}
