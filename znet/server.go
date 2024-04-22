@@ -3,6 +3,7 @@ package znet
 import (
 	// "errors"
 	"fmt"
+	"my_zinx/utils"
 	"my_zinx/ziface"
 	"net"
 )
@@ -31,16 +32,17 @@ type Server struct {
 
 func NewServer(name string) ziface.IServer {
     s := &Server {
-        Name : name,
+        Name : utils.GlobalObj.Name,
         IpVersion : "tcp4",
-        Ip : "192.168.18.128",
-        port : 8999,
+        Ip : utils.GlobalObj.Host,
+        port : utils.GlobalObj.TcpPort,
         Router : nil,
     }
     return s
 }
 
 func (self *Server) Start() {
+    fmt.Println(utils.GlobalObj)
     // 1. get addr
     addr, err := net.ResolveTCPAddr(self.IpVersion, fmt.Sprintf("%s:%d", self.Ip, self.port))
     if err != nil {
@@ -54,7 +56,7 @@ func (self *Server) Start() {
         fmt.Println("ListenTCP Error")
         return 
     }
-    fmt.Printf("Server start success: ip:%s, port:%d\n", self.Ip, self.port)
+    // fmt.Printf("Server start success: ip:%s, port:%d\n", self.Ip, self.port)
 
     // 3. get cilent connections
     var cid uint32 
