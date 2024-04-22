@@ -8,4 +8,6 @@ type IServer interface {
     Stop()
     // run Server 
     Serve()
+    // customize router
+    AddRouter(router IRouter)
 }

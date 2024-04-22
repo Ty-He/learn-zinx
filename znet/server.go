@@ -1,7 +1,7 @@
 package znet
 
 import (
-	"errors"
+	// "errors"
 	"fmt"
 	"my_zinx/ziface"
 	"net"
@@ -14,18 +14,20 @@ type Server struct {
     IpVersion string
     Ip string
     port int
+    // router for handle
+    Router ziface.IRouter
 }
 
 // handapi, later apply by demo
-func callback_client(conn *net.TCPConn, data []byte, n int) error {
-    // echo 
-    fmt.Println("conn handle callback_client")
-    if _, err := conn.Write(data[:n]); err != nil {
-        fmt.Println("Conn Write Error:", err) 
-        return errors.New("callback_client error")
-    }
-    return nil
-}
+// func callback_client(conn *net.TCPConn, data []byte, n int) error {
+//     // echo 
+//     fmt.Println("conn handle callback_client")
+//     if _, err := conn.Write(data[:n]); err != nil {
+//         fmt.Println("Conn Write Error:", err) 
+//         return errors.New("callback_client error")
+//     }
+//     return nil
+// }
 
 func NewServer(name string) ziface.IServer {
     s := &Server {
@@ -33,6 +35,7 @@ func NewServer(name string) ziface.IServer {
         IpVersion : "tcp4",
         Ip : "192.168.18.128",
         port : 8999,
+        Router : nil,
     }
     return s
 }
@@ -64,7 +67,7 @@ func (self *Server) Start() {
         }
         
         // bind conn and Connection
-        dealConn := NewConnection(conn, cid, callback_client)
+        dealConn := NewConnection(conn, cid, self.Router)
         cid ++
 
         // in case if obsructive current goroutinue
@@ -110,3 +113,7 @@ func (self *Server) Serve() {
 }
 
 
+func (self *Server) AddRouter(router ziface.IRouter) {
+    fmt.Println("Add a router from user")
+    self.Router = router
+}

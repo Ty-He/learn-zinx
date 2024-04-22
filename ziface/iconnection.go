@@ -11,11 +11,11 @@ type IConnection interface {
     // get socket obj
     GetTCPConnection() *net.TCPConn
     // get index
-    getConnID() uint32
+    GetConnID() uint32
     // get client information
     RemoteAddr() net.Addr
     // send message
-    send(data []byte) error 
+    Send(data []byte) error 
 }
 
 // work functino

@@ -14,18 +14,20 @@ type Connection struct {
     // the status of current connection
     isClosed bool
     // worker-function
-    handleAPI ziface.HandleFunc 
+    // handleAPI ziface.HandleFunc 
+    // router
+    Router ziface.IRouter
     // signal of exit
     ExitChan chan bool
 }
 
 
-func NewConnection(conn *net.TCPConn, connID uint32, callback_api ziface.HandleFunc) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, router ziface.IRouter) *Connection {
     obj := &Connection {
         Conn : conn,
         ConnID : connID,
         isClosed : false,
-        handleAPI : callback_api,
+        Router : router,
         ExitChan : make(chan bool, 1),
     }
     return obj
@@ -51,9 +53,21 @@ func (self *Connection) start_reader() {
             continue
         }
         // handle the data from client
-        if err := self.handleAPI(self.Conn, buf, n); err != nil {
-            fmt.Println("handleAPI error", err)
+        // if err := self.handleAPI(self.Conn, buf, n); err != nil {
+        //     fmt.Println("handleAPI error", err)
+        // }
+        
+        // constuct request
+        req := Request {
+            conn : self,
+            data : buf,
         }
+        // router handle
+        go func(request ziface.IRequest) {
+            self.Router.PreHandle(request)
+            self.Router.Handle(request)
+            self.Router.PostHandle(request)
+        }(&req)
     }
 }
 
@@ -66,10 +80,10 @@ func (self *Connection) Start() {
 
 
 func (self *Connection) Stop() {
-    fmt.Printf("Connection Stop, ID:%d\n", self.ConnID)
     if self.isClosed {
         return 
     }
+    fmt.Printf("Connection Stop, ID:%d\n", self.ConnID)
     self.isClosed = true
     // close socket fd
     self.Conn.Close()
@@ -83,7 +97,7 @@ func (self *Connection) GetTCPConnection() *net.TCPConn{
 }
 
 
-func (self *Connection) getConnID() uint32 {
+func (self *Connection) GetConnID() uint32 {
     return self.ConnID
 }
 
@@ -92,6 +106,6 @@ func (self *Connection) RemoteAddr() net.Addr{
     return self.Conn.RemoteAddr()
 }
 
-func (self *Connection) send(data []byte) error {
+func (self *Connection) Send(data []byte) error {
     return nil
 }
