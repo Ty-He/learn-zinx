@@ -1,7 +1,6 @@
 package znet
 
 import (
-	// "errors"
 	"fmt"
 	"my_zinx/utils"
 	"my_zinx/ziface"
@@ -33,7 +32,7 @@ type Server struct {
 func NewServer(name string) ziface.IServer {
     s := &Server {
         Name : utils.GlobalObj.Name,
-        IpVersion : "tcp4",
+        IpVersion : "tcp",
         Ip : utils.GlobalObj.Host,
         port : utils.GlobalObj.TcpPort,
         Router : nil,
@@ -42,7 +41,14 @@ func NewServer(name string) ziface.IServer {
 }
 
 func (self *Server) Start() {
-    fmt.Println(utils.GlobalObj)
+    fmt.Printf("Name:%s; IpVersion:%s, Host: %s, Port:%d, MaxConn:%d, MaxPkgSz:%d\n", 
+        utils.GlobalObj.Name,
+        utils.GlobalObj.Version,
+        utils.GlobalObj.Host,
+        utils.GlobalObj.TcpPort,
+        utils.GlobalObj.MaxConn,
+        utils.GlobalObj.MaxPackageSize)
+
     // 1. get addr
     addr, err := net.ResolveTCPAddr(self.IpVersion, fmt.Sprintf("%s:%d", self.Ip, self.port))
     if err != nil {

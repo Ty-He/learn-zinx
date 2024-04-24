@@ -6,7 +6,9 @@ type Request struct {
     // socket fd
     conn ziface.IConnection 
     // data
-    data []byte
+    // data []byte
+    // message
+    msg ziface.IMessage 
 }
 
 
@@ -15,5 +17,9 @@ func (self *Request) GetConnection() ziface.IConnection {
 }
 
 func (self *Request) GetDate() []byte {
-    return self.data
+    return self.msg.GetData()
+}
+
+func (self *Request) GetMsgId() uint32 {
+    return self.msg.GetId()
 }
