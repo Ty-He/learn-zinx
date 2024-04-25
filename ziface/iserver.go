@@ -9,5 +9,5 @@ type IServer interface {
     // run Server 
     Serve()
     // customize router
-    AddRouter(router IRouter)
+    AddRouter(uint32, IRouter)
 }

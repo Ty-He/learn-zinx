@@ -5,4 +5,6 @@ type IRequest interface {
     GetConnection() IConnection
     // client request data
     GetDate() []byte
+
+    GetMsgId() uint32
 }

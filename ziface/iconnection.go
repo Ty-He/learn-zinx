@@ -15,7 +15,7 @@ type IConnection interface {
     // get client information
     RemoteAddr() net.Addr
     // send message
-    Send(data []byte) error 
+    SendMsg(msgId uint32, data []byte) error 
 }
 
 // work functino

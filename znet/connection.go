@@ -18,18 +18,19 @@ type Connection struct {
     // worker-function
     // handleAPI ziface.HandleFunc 
     // router
-    Router ziface.IRouter
+    // Router ziface.IRouter
+    MsgHandler ziface.IMsghandle
     // signal of exit
     ExitChan chan bool
 }
 
 
-func NewConnection(conn *net.TCPConn, connID uint32, router ziface.IRouter) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsghandle) *Connection {
     obj := &Connection {
         Conn : conn,
         ConnID : connID,
         isClosed : false,
-        Router : router,
+        MsgHandler : msgHandler, 
         ExitChan : make(chan bool, 1),
     }
     return obj
@@ -97,11 +98,7 @@ func (self *Connection) start_reader() {
             msg : msg,
         }
         // router handle
-        go func(request ziface.IRequest) {
-            self.Router.PreHandle(request)
-            self.Router.Handle(request)
-            self.Router.PostHandle(request)
-        }(&req)
+        go self.MsgHandler.DoHandle(&req)
     }
 }
 

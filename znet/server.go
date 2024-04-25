@@ -15,7 +15,10 @@ type Server struct {
     Ip string
     port int
     // router for handle
-    Router ziface.IRouter
+    // Router ziface.IRouter
+    
+    // msgHandler --> f(msgid)-> handle
+    MsgHandler ziface.IMsghandle
 }
 
 // handapi, later apply by demo
@@ -29,13 +32,13 @@ type Server struct {
 //     return nil
 // }
 
-func NewServer(name string) ziface.IServer {
+func NewServer() ziface.IServer {
     s := &Server {
         Name : utils.GlobalObj.Name,
         IpVersion : "tcp",
         Ip : utils.GlobalObj.Host,
         port : utils.GlobalObj.TcpPort,
-        Router : nil,
+        MsgHandler : NewMsgHandle(),
     }
     return s
 }
@@ -75,7 +78,7 @@ func (self *Server) Start() {
         }
         
         // bind conn and Connection
-        dealConn := NewConnection(conn, cid, self.Router)
+        dealConn := NewConnection(conn, cid, self.MsgHandler)
         cid ++
 
         // in case if obsructive current goroutinue
@@ -121,7 +124,7 @@ func (self *Server) Serve() {
 }
 
 
-func (self *Server) AddRouter(router ziface.IRouter) {
-    fmt.Println("Add a router from user")
-    self.Router = router
+func (self *Server) AddRouter(msgId uint32, router ziface.IRouter) {
+    fmt.Printf("Add a router, msgId = %d\n", msgId)
+    self.MsgHandler.AddRouter(msgId, router)
 }

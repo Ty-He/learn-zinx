@@ -24,7 +24,7 @@ var GlobalObj *GlobalObject
 
 // load jsonfile
 func (this *GlobalObject) load() {
-    data, err := ioutil.ReadFile("./conf/zinx.json")
+    data, err := ioutil.ReadFile("/home/ty/go/src/my_demo/zinx_app/conf/zinx.json")
     if err != nil {
         panic(err)
     }
@@ -38,7 +38,7 @@ func init() {
     // load default value 
     GlobalObj = &GlobalObject {
         Name : "ZinxServerApp",
-        Version : "V0.4",
+        Version : "V0.5",
         Host : "192.168.18.128",
         TcpPort : 8999,
         MaxConn : 10,
