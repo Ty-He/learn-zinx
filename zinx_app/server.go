@@ -42,15 +42,35 @@ func (self *PingRouter) Handle(request ziface.IRequest) {
     fmt.Printf("Recv from client: msgId=%d,msgData=%s\n", request.GetMsgId(), request.GetDate())
 
     // write to client
-    if err := request.GetConnection().SendMsg(1, []byte("ping...ping...ping")); err != nil {
+    if err := request.GetConnection().SendMsg(0, []byte("ping...ping...ping")); err != nil {
         fmt.Println("SendMsg Error:", err)
     }
 }
+
+
+
+// router-define
+type HelloRouter struct {
+    znet.BaseRouter
+}
+func (self *HelloRouter) Handle(request ziface.IRequest) {
+    fmt.Printf("Recv from client: msgId=%d,msgData=%s\n", request.GetMsgId(), request.GetDate())
+
+    // write to client
+    if err := request.GetConnection().SendMsg(1, []byte("Hello,Zinx!")); err != nil {
+        fmt.Println("SendMsg Error:", err)
+    }
+}
+
+
+//
+
 func main() {
     // server 
-    s := znet.NewServer("ZinxV0.5")
+    s := znet.NewServer()
     // add pingrouter
-    s.AddRouter(&PingRouter{})
+    s.AddRouter(0, &PingRouter{})
+    s.AddRouter(1, &HelloRouter{})
     // run serve
     s.Serve()
 }

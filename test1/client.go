@@ -23,8 +23,8 @@ func main() {
 
     for {
         dataPack := znet.NewDataPack()
-        // send msgId = 0
-        buf, err := dataPack.Pack(znet.NewMessage(0, []byte("test_message")))
+        // send msgId = 1
+        buf, err := dataPack.Pack(znet.NewMessage(1, []byte("test_message")))
         if err != nil {
             fmt.Println("Pack Error:", err)
             break
