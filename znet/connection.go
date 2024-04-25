@@ -22,6 +22,8 @@ type Connection struct {
     MsgHandler ziface.IMsghandle
     // signal of exit
     ExitChan chan bool
+    // reader and writer's message channel
+    msgChan chan []byte
 }
 
 
@@ -32,12 +34,13 @@ func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsghandl
         isClosed : false,
         MsgHandler : msgHandler, 
         ExitChan : make(chan bool, 1),
+        msgChan : make(chan []byte),
     }
     return obj
 }
 
 func (self *Connection) start_reader() {
-    fmt.Println("Reader Goroutinue is runnning ...")
+    fmt.Println("[Reader Goroutinue is runnning] ...")
     defer fmt.Printf("Read exit, ConnID:%d, RemoteAddr:%s\n", self.ConnID, self.RemoteAddr().String())
     // if read goroutine is finished, then all conn could stop
     defer self.Stop()
@@ -102,24 +105,51 @@ func (self *Connection) start_reader() {
     }
 }
 
+func (self *Connection) start_writer() {
+    fmt.Println("[Writer Goroutinue is runnning] ...")
+    defer fmt.Printf("Writ exit, ConnID:%d, RemoteAddr:%s\n", self.ConnID, self.RemoteAddr().String())
+
+    // wait msg
+    for {
+        select {
+        case data := <-self.msgChan:
+            if _, err := self.Conn.Write(data); err != nil {
+                fmt.Println("Write Error:", err)
+                return
+            }        
+        // reader tell writer to stop.
+        case <-self.ExitChan:
+            return
+        }
+    }
+
+}
+
 func (self *Connection) Start() {
     fmt.Printf("Connection Start-> ConnID:%d, RemoteAddr:%s\n", self.ConnID, self.RemoteAddr().String())
     // read goroutine
     go self.start_reader()
-    // TODO write goroutine
+    // write goroutine
+    go self.start_writer()
 }
 
 
 func (self *Connection) Stop() {
+    // ensure close once
     if self.isClosed {
         return 
     }
     fmt.Printf("Connection Stop, ID:%d\n", self.ConnID)
     self.isClosed = true
+    
+    // reader tell writer
+    self.ExitChan <- true
+
     // close socket fd
     self.Conn.Close()
     // close channel
     close(self.ExitChan)
+    close(self.msgChan)
 }
 
 
@@ -149,8 +179,11 @@ func (self *Connection) SendMsg(msgId uint32, data []byte) error {
     }
     
     // send stream
-    if _, err := self.Conn.Write(buf); err != nil {
-        return err
-    }
+    // if _, err := self.Conn.Write(buf); err != nil {
+    //     return err
+    // }
+
+    // send to Writer Goroutine
+    self.msgChan <- buf
     return nil
 }
