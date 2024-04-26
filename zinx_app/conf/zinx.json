@@ -1,7 +1,8 @@
 {
     "Name" : "demo app",
-    "Version" : "[Zinx V0.7]",
+    "AppVersion" : "[demo V0.8]",
     "Host" : "192.168.18.128",
     "TcpPort" : 8999,
-    "MaxConn" : 3
+    "MaxConn" : 3,
+    "WorkerPoolSize" : 10
 }
