@@ -17,6 +17,14 @@ type GlobalObject struct {
     Version string 
     MaxConn int 
     MaxPackageSize uint32
+
+    // WorkerPool's count
+    WorkerPoolSize uint32
+    // limit WorkerPoolSize
+    MaxTaskSize uint32 
+    
+    // app-Version
+    AppVersion string
 }
 
 // global object 
@@ -38,11 +46,13 @@ func init() {
     // load default value 
     GlobalObj = &GlobalObject {
         Name : "ZinxServerApp",
-        Version : "V0.5",
+        Version : "V0.8",
         Host : "192.168.18.128",
         TcpPort : 8999,
         MaxConn : 10,
         MaxPackageSize : 1024,
+        WorkerPoolSize : 10,
+        MaxTaskSize : 1024,
     }
     // jsonfile
     GlobalObj.load()

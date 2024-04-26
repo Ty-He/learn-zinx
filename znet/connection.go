@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"my_zinx/utils"
 	"my_zinx/ziface"
 	"net"
 )
@@ -100,8 +101,14 @@ func (self *Connection) start_reader() {
             conn : self,
             msg : msg,
         }
-        // router handle
-        go self.MsgHandler.DoHandle(&req)
+
+
+        if utils.GlobalObj.WorkerPoolSize > 0 {
+            self.MsgHandler.PushTask(&req)
+        } else {
+            // WorkerPool is closed, router handle
+            go self.MsgHandler.DoHandle(&req)
+        }
     }
 }
 

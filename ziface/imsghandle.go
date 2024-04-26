@@ -6,4 +6,10 @@ type IMsghandle interface {
 
     // add router to map
     AddRouter(uint32, IRouter)
+
+    // 
+    StartWorkerPool()
+
+    // add req to taksQue
+    PushTask(IRequest)
 }

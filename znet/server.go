@@ -44,13 +44,15 @@ func NewServer() ziface.IServer {
 }
 
 func (self *Server) Start() {
-    fmt.Printf("Name:%s; IpVersion:%s, Host: %s, Port:%d, MaxConn:%d, MaxPkgSz:%d\n", 
+    fmt.Printf("Name:%s; ZinxVersion:%s, Host: %s, Port:%d, MaxConn:%d, MaxPkgSz:%d\n", 
         utils.GlobalObj.Name,
         utils.GlobalObj.Version,
         utils.GlobalObj.Host,
         utils.GlobalObj.TcpPort,
         utils.GlobalObj.MaxConn,
         utils.GlobalObj.MaxPackageSize)
+
+    fmt.Printf("Application Versoin:%s\n", utils.GlobalObj.AppVersion)
 
     // 1. get addr
     addr, err := net.ResolveTCPAddr(self.IpVersion, fmt.Sprintf("%s:%d", self.Ip, self.port))
@@ -66,6 +68,9 @@ func (self *Server) Start() {
         return 
     }
     // fmt.Printf("Server start success: ip:%s, port:%d\n", self.Ip, self.port)
+
+    // if error occur before now, workepool don't need start.
+    self.MsgHandler.StartWorkerPool()
 
     // 3. get cilent connections
     var cid uint32 
