@@ -53,6 +53,7 @@ func (self *PingRouter) Handle(request ziface.IRequest) {
 type HelloRouter struct {
     znet.BaseRouter
 }
+
 func (self *HelloRouter) Handle(request ziface.IRequest) {
     fmt.Printf("Recv from client: msgId=%d,msgData=%s\n", request.GetMsgId(), request.GetDate())
 
@@ -62,15 +63,32 @@ func (self *HelloRouter) Handle(request ziface.IRequest) {
     }
 }
 
+// Hook function
 
+func OnConnStart(conn ziface.IConnection) {
+    fmt.Println("===>New a connecion.")
+    if err := conn.SendMsg(666, []byte("Call onConnStart...")); err != nil {
+        fmt.Println(err)
+    }
+}
+
+func OnConnStop(conn ziface.IConnection) {
+    fmt.Printf("===>Connection [%d] is lost.\n", conn.GetConnID())
+}
 //
 
 func main() {
     // server 
     s := znet.NewServer()
+
+    // register hook func
+    s.SetOnConnStart(OnConnStart)
+    s.SetOnConnStop(OnConnStop)
+
     // add pingrouter
     s.AddRouter(0, &PingRouter{})
     s.AddRouter(1, &HelloRouter{})
+
     // run serve
     s.Serve()
 }
