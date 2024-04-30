@@ -7,6 +7,7 @@ import (
 	"my_zinx/utils"
 	"my_zinx/ziface"
 	"net"
+	"sync"
 )
 
 type Connection struct {
@@ -28,6 +29,10 @@ type Connection struct {
     ExitChan chan bool
     // reader and writer's message channel
     msgChan chan []byte
+
+    // attribute defined by user
+    property map[string] interface{}
+    propertyRwMutex sync.RWMutex
 }
 
 
@@ -40,6 +45,7 @@ func NewConnection(server ziface.IServer, conn *net.TCPConn, connID uint32, msgH
         MsgHandler : msgHandler, 
         ExitChan : make(chan bool, 1),
         msgChan : make(chan []byte),
+        property : make(map[string] interface{}),
     }
 
     obj.TcpServer.GetConnManager().Insert(obj)
@@ -210,3 +216,32 @@ func (self *Connection) SendMsg(msgId uint32, data []byte) error {
     self.msgChan <- buf
     return nil
 }
+
+// insert [key, value]
+func (self *Connection) SetProperty(key string, value interface{}) {
+    self.propertyRwMutex.Lock()
+    defer self.propertyRwMutex.Unlock()
+    
+    self.property[key] = value
+}
+
+
+func (self *Connection) RemoveProperty(key string) {
+    self.propertyRwMutex.Lock()
+    defer self.propertyRwMutex.Unlock()
+    
+    delete(self.property, key)
+}
+
+
+func (self *Connection) GetProperty(key string) (interface{}, error) {
+    self.propertyRwMutex.RLock()
+    defer self.propertyRwMutex.RUnlock()
+
+    if value, exist := self.property[key]; exist {
+        return value, nil
+    } else {
+        return nil, errors.New("Not exist key:" + key)
+    }
+}
+
