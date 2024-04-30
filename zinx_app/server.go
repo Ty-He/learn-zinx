@@ -61,6 +61,7 @@ func (self *HelloRouter) Handle(request ziface.IRequest) {
     if err := request.GetConnection().SendMsg(1, []byte("Hello,Zinx!")); err != nil {
         fmt.Println("SendMsg Error:", err)
     }
+
 }
 
 // Hook function
@@ -70,10 +71,26 @@ func OnConnStart(conn ziface.IConnection) {
     if err := conn.SendMsg(666, []byte("Call onConnStart...")); err != nil {
         fmt.Println(err)
     }
+
+    // define property
+    conn.SetProperty("name", "Ty")
+    conn.SetProperty("github", "github.com/Ty-He")
+    conn.SetProperty("location", "Nanchang")
 }
 
 func OnConnStop(conn ziface.IConnection) {
     fmt.Printf("===>Connection [%d] is lost.\n", conn.GetConnID())
+
+    // read property
+    if name, err := conn.GetProperty("name"); err == nil {
+        fmt.Println("name:", name)
+    }
+    if github, err := conn.GetProperty("github"); err == nil {
+        fmt.Println("github:", github)
+    }
+    if location, err := conn.GetProperty("location"); err == nil {
+        fmt.Println("location:", location)
+    }
 }
 //
 

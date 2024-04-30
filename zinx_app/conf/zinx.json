@@ -1,8 +1,8 @@
 {
     "Name" : "demo app",
-    "AppVersion" : "[demo V0.9]",
+    "AppVersion" : "[demo V0.10]",
     "Host" : "192.168.18.128",
     "TcpPort" : 8999,
-    "MaxConn" : 2,
+    "MaxConn" : 3,
     "WorkerPoolSize" : 10
 }
