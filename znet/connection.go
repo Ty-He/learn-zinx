@@ -10,6 +10,9 @@ import (
 )
 
 type Connection struct {
+    // current Conn's server
+    TcpServer ziface.IServer
+
     // tcp-socket
     Conn *net.TCPConn
     // index
@@ -28,8 +31,9 @@ type Connection struct {
 }
 
 
-func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsghandle) *Connection {
+func NewConnection(server ziface.IServer, conn *net.TCPConn, connID uint32, msgHandler ziface.IMsghandle) *Connection {
     obj := &Connection {
+        TcpServer : server,
         Conn : conn,
         ConnID : connID,
         isClosed : false,
@@ -37,6 +41,9 @@ func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsghandl
         ExitChan : make(chan bool, 1),
         msgChan : make(chan []byte),
     }
+
+    obj.TcpServer.GetConnManager().Insert(obj)
+
     return obj
 }
 
@@ -138,6 +145,9 @@ func (self *Connection) Start() {
     go self.start_reader()
     // write goroutine
     go self.start_writer()
+
+    // call hook
+    self.TcpServer.CallOnConnStart(self)
 }
 
 
@@ -148,6 +158,9 @@ func (self *Connection) Stop() {
     }
     fmt.Printf("Connection Stop, ID:%d\n", self.ConnID)
     self.isClosed = true
+
+    // call hook 
+    self.TcpServer.CallOnConnStop(self)
     
     // reader tell writer
     self.ExitChan <- true
@@ -157,6 +170,9 @@ func (self *Connection) Stop() {
     // close channel
     close(self.ExitChan)
     close(self.msgChan)
+
+    // remove from map
+    self.TcpServer.GetConnManager().Remove(self.ConnID)
 }
 
 

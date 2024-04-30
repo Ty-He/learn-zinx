@@ -19,6 +19,15 @@ type Server struct {
     
     // msgHandler --> f(msgid)-> handle
     MsgHandler ziface.IMsghandle
+
+    // Connection Manager
+    connManager ziface.IConnManager
+
+    // hook after start a connection 
+    onConnStart func (ziface.IConnection)
+
+    // hook before stop a connection
+    onConnStop func (ziface.IConnection)
 }
 
 // handapi, later apply by demo
@@ -39,6 +48,7 @@ func NewServer() ziface.IServer {
         Ip : utils.GlobalObj.Host,
         port : utils.GlobalObj.TcpPort,
         MsgHandler : NewMsgHandle(),
+        connManager : NewConnManager(),
     }
     return s
 }
@@ -82,8 +92,17 @@ func (self *Server) Start() {
             continue
         }
         
+        // judge the amount ofconnection
+        if self.connManager.Len() >= utils.GlobalObj.MaxConn {
+            conn.Close() 
+            // TODO send a response
+            fmt.Println("Too many connections.")
+            continue
+        }
+
+
         // bind conn and Connection
-        dealConn := NewConnection(conn, cid, self.MsgHandler)
+        dealConn := NewConnection(self, conn, cid, self.MsgHandler)
         cid ++
 
         // in case if obsructive current goroutinue
@@ -114,8 +133,12 @@ func (self *Server) Start() {
 }
 
 func (self *Server) Stop() {
+    // TODO destroy worker pool
+
+    self.connManager.Clear()
 
 }
+
 func (self *Server) Serve() {
     go self.Start()
 
@@ -132,4 +155,33 @@ func (self *Server) Serve() {
 func (self *Server) AddRouter(msgId uint32, router ziface.IRouter) {
     fmt.Printf("Add a router, msgId = %d\n", msgId)
     self.MsgHandler.AddRouter(msgId, router)
+}
+
+
+func (self *Server) GetConnManager() ziface.IConnManager {
+    return self.connManager
+}
+
+
+func (self *Server) SetOnConnStop(hook func (ziface.IConnection)) {
+    self.onConnStop = hook
+}
+
+
+func (self *Server) SetOnConnStart(hook func (ziface.IConnection)) {
+    self.onConnStart = hook
+}
+
+func (self *Server) CallOnConnStart(conn ziface.IConnection) {
+    if self.onConnStart != nil {
+        fmt.Println("Call OnConnStart...")
+        self.onConnStart(conn)
+    }
+}
+
+func (self *Server) CallOnConnStop(conn ziface.IConnection) {
+    if self.onConnStop != nil {
+        fmt.Println("Call OnConnStop...")
+        self.onConnStop(conn)
+    }
 }

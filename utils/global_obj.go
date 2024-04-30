@@ -46,7 +46,7 @@ func init() {
     // load default value 
     GlobalObj = &GlobalObject {
         Name : "ZinxServerApp",
-        Version : "V0.8",
+        Version : "V0.9",
         Host : "192.168.18.128",
         TcpPort : 8999,
         MaxConn : 10,
