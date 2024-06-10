@@ -61,6 +61,7 @@ func (sf *SendFileRouter) Handle(request ziface.IRequest) {
             return
         }
     } else {
+        fmt.Println(target)
         err := blockTransfer(file, request)
         if err != nil {
             fmt.Println("totalTransfer err:", err)
@@ -194,7 +195,7 @@ func (md *MakeDirRouter) Handle(request ziface.IRequest) {
     if len(request.GetDate()) > 6 {
         dirname = string(request.GetDate()[6:])
     }
-    if err := os.Mkdir(pa + "/" + dirname, 0644); err != nil {
+    if err := os.Mkdir(pa + "/" + dirname, 0744); err != nil {
         request.GetConnection().SendMsg(ft_err, []byte("bad directory!")) 
     } else {
         request.GetConnection().SendMsg(ft_ok, []byte("mkdir ok!"))
@@ -217,7 +218,7 @@ func (rf *RecvFileRouter) Handle(request ziface.IRequest) {
     file, err := os.OpenFile(pa + "/" + name, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0644)
 
     if err != nil {
-        request.GetConnection().SendMsg(ft_err, []byte("bad filename!")) 
+        request.GetConnection().SendMsg(ft_err, []byte("bad filename! " + pa + "/" + name)) 
     } else if fi, _:= file.Stat(); fi.IsDir() {
         request.GetConnection().SendMsg(ft_err, []byte("try to write directory!")) 
     }  else {
@@ -350,17 +351,14 @@ func totalTransfer(file *os.File, request ziface.IRequest) error {
     for {
         // call once only read 1 line
         line, err := reader.ReadString('\n')
-        if err != nil {
-            if err.Error() == "EOF" {
-                // request.GetConnection().SendMsg(ft_ok, []byte("Finish file transfer!!!"))
-                fmt.Println("Readfile ok!")
-            } else {
-                return err
-            }
-            break
+        if err != nil && err.Error() != "EOF" {
+            return err
         }
         // fmt.Println("[Readfile:]", line)
         buf.WriteString(line)
+        if err != nil && err.Error() == "EOF" {
+            break
+        }
     }
     if err := request.GetConnection().SendMsg(ft_file_send, buf.Bytes()); err != nil {
         return err
@@ -374,22 +372,24 @@ func blockTransfer(file *os.File, request ziface.IRequest) error {
     for {
         // call once only read 1 line
         line, err := reader.ReadString('\n')
-        if err != nil {
-            if err.Error() == "EOF" {
-                // request.GetConnection().SendMsg(ft_ok, []byte("Finish file transfer!!!"))
-                fmt.Println("Readfile ok!")
-            } else {
-                return err
-            }
-            break
+        if err != nil && err.Error() != "EOF" {
+            return err
         }
         // fmt.Println("[Readfile:]", line)
         buf.WriteString(line)
-        if buf.Len() > 99 * 1024 {
+        if buf.Len() > 95 * 1024 {
             if err := request.GetConnection().SendMsg(ft_file_send, buf.Bytes()); err != nil {
                 return err
             }
             buf = bytes.NewBuffer([]byte{})
+        }
+        if err != nil && err.Error() == "EOF" {
+            if (buf.Len() > 0) {
+                if err := request.GetConnection().SendMsg(ft_file_send, buf.Bytes()); err != nil {
+                    return err
+                }
+            }
+            break
         }
     }
     return nil
