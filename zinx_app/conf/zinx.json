@@ -3,6 +3,6 @@
     "AppVersion" : "[demo V0.10]",
     "Host" : "192.168.18.128",
     "TcpPort" : 8999,
-    "MaxConn" : 3,
+    "MaxConn" : 10,
     "WorkerPoolSize" : 10
 }

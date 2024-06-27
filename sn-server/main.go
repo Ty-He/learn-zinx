@@ -31,7 +31,7 @@ const (
 
 
 func main() {
-    dsn := "root:245869@tcp(192.168.113.112:3306)/social_net"
+    dsn := "root:245869@tcp(192.168.107.112:3306)/social_net"
     db, err := sql.Open("mysql", dsn)
     if err != nil {
         fmt.Println("Open sql err:", err)
