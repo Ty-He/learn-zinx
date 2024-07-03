@@ -108,7 +108,7 @@ func (m *AOIManager) GetGid(x, y float32) uint {
 }
 
 // By position index, get total playerIds which in same area 
-func (m *AOIManager) GetPlayerIds(x, y float32) (playerIds []uint) {
+func (m *AOIManager) GetPlayerIds(x, y float32) (playerIds []int32) {
     grids := m.GetSurroundGrid(m.GetGid(x, y))
     
     for _, grid := range grids {
@@ -119,26 +119,26 @@ func (m *AOIManager) GetPlayerIds(x, y float32) (playerIds []uint) {
 
 
 // By PlayerId, add player to grid
-func (m *AOIManager) AddPidToGrid(pid, gid uint) {
+func (m *AOIManager) AddPidToGrid(pid int32, gid uint) {
     m.grids[gid].Add(pid)
 }
 
 // By PlayerId, remove player to grid
-func (m *AOIManager) RemovePidFromGrid(pid, gid uint) {
+func (m *AOIManager) RemovePidFromGrid(pid int32, gid uint) {
     m.grids[gid].Remove(pid)
 }
 
 // get total player from grid 
-func (m *AOIManager) GetPidInGrid(gid uint) []uint {
+func (m *AOIManager) GetPidInGrid(gid uint) []int32 {
     return m.grids[gid].GetPlayIds()
 }
 
 // By position index, add player to grid 
-func (m *AOIManager) AddPosToGrid(pid uint, x, y float32) {
+func (m *AOIManager) AddPosToGrid(pid int32, x, y float32) {
     m.grids[m.GetGid(x, y)].Add(pid)
 }
 
 // By position index, remove player to grid 
-func (m *AOIManager) RemovePosFromGrid(pid uint, x, y float32) {
+func (m *AOIManager) RemovePosFromGrid(pid int32, x, y float32) {
     m.grids[m.GetGid(x, y)].Remove(pid)
 }

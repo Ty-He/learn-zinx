@@ -14,7 +14,7 @@ type Grid struct {
     MinY uint 
     MaxY uint 
     // all player collection
-    playerIds map[uint]struct{}
+    playerIds map[int32]struct{}
     pIdLock sync.RWMutex 
 }
 
@@ -25,12 +25,12 @@ func NewGrid(gid, minX, maxX, minY, maxY uint) *Grid {
         MaxX: maxX,
         MinY: minY,
         MaxY: maxY,
-        playerIds: make(map[uint]struct{}),
+        playerIds: make(map[int32]struct{}),
     }
 }
 
 // add a playerId
-func (g *Grid) Add(playerId uint) {
+func (g *Grid) Add(playerId int32) {
     g.pIdLock.Lock()
     defer g.pIdLock.Unlock()
 
@@ -38,7 +38,7 @@ func (g *Grid) Add(playerId uint) {
 }
 
 // Remove a playerId
-func (g *Grid) Remove(playerId uint) {
+func (g *Grid) Remove(playerId int32) {
     g.pIdLock.Lock()
     defer g.pIdLock.Unlock()
     
@@ -46,8 +46,8 @@ func (g *Grid) Remove(playerId uint) {
 }
 
 // get all playerIds
-func (g *Grid) GetPlayIds() []uint {
-    playerIds := make([]uint, len(g.playerIds))
+func (g *Grid) GetPlayIds() []int32 {
+    playerIds := make([]int32, len(g.playerIds))
     var idx int 
     g.pIdLock.RLock()
     defer g.pIdLock.RUnlock()
